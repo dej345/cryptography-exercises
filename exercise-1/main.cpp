@@ -7,12 +7,14 @@ using namespace std;
 
 void vigenereCipher(string cipherText);
 void cipher3(string cipherText);
+void cipher4(string cipherText);
 
 int main(){
     // cipher 1-2 solved same way
     //vigenereCipher("ct/ct1.txt");
     //vigenereCipher("ct/ct2.txt");
-    vigenereCipher("ct/ct3.txt");
+    //cipher3("ct/ct3.txt");
+    cipher4("ct/ct4.txt");
 
     return 0;
 }
@@ -57,7 +59,29 @@ void vigenereCipher(string cipherText){
     }
 }
 
+
 void cipher3(string cipherText){
     string ct = readCT(cipherText);
-    frequencyAnalysis(ct);
+    vector<pair<char, int>> freq = frequencyAnalysis(ct);
+    string pt = monoFreqSub(ct, freq);
+    cout << "Plaintext after swap = " << pt << endl;
+
+    // manual swapping
+    vector<pair<char,char>> swaps = {
+        {'N','H'}, {'A','I'}, {'S','N'}, {'R','S'}, {'W','F'},
+        {'O','A'}, {'U','M'}, {'D','L'}, {'B','Y'}, {'P','V'},
+        {'G','P'}, {'B','C'}, {'B','G'}
+    };
+    
+    for (auto &s : swaps){
+        pt = manualSwap(pt, s.first, s.second);
+        cout << "Swap " << s.first << "<->" << s.second << ": " << pt << endl;
+    }
+}
+
+
+void cipher4(string cipherText){
+    string ct = readCT(cipherText);
+    vector<pair<char, int>> freq = frequencyAnalysis(ct);
+    
 }

@@ -280,37 +280,7 @@ string decryptWithKey(string ct, string key){
 }
 
 
-double englishScore(string text){
-    // English letter frequencies (percentage)
-    double englishFreq[26] = {
-        8.167,  // A
-        1.492,  // B
-        2.782,  // C
-        4.253,  // D
-        12.702, // E
-        2.228,  // F
-        2.015,  // G
-        6.094,  // H
-        6.966,  // I
-        0.153,  // J
-        0.772,  // K
-        4.025,  // L
-        2.406,  // M
-        6.749,  // N
-        7.507,  // O
-        1.929,  // P
-        0.095,  // Q
-        5.987,  // R
-        6.327,  // S
-        9.056,  // T
-        2.758,  // U
-        0.978,  // V
-        2.360,  // W
-        0.150,  // X
-        1.974,  // Y
-        0.074   // Z
-    };
-    
+double englishScore(string text){    
     int counts[26] = {0};
     int totalLetters = 0;
     
@@ -334,4 +304,36 @@ double englishScore(string text){
     }
     
     return chiSquared;
+}
+
+
+string monoFreqSub(string ct, vector<pair<char, int>> freq){
+    // English letters sorted by frequency (most to least)
+    string englishOrder = "ETAOINSRHDLUCMFYWGPBVKXQJZ";
+    
+    // Build substitution map: ciphertext letter -> plaintext letter
+    char sub[27];
+    sub[26] = '\0';
+    for (int i = 0; i < 26 && i < freq.size(); i++){
+        sub[freq[i].first - 'A'] = englishOrder[i];
+    }
+    
+    cout << "Key = "<< sub << endl;
+
+    string pt = "";
+    for (char c : ct){
+        if (isalpha(c)){
+            pt += sub[toupper(c) - 'A'];
+        }
+    }
+    
+    return pt;
+}
+
+string manualSwap(string pt, char a, char b){
+    for (char &c : pt){
+        if (c == a) c = b;
+        else if (c == b) c = a;
+    }
+    return pt;
 }
