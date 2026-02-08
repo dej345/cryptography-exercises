@@ -65,5 +65,13 @@ string manualSwap(string pt, char a, char b);
 // made to solve cipher 5
 unordered_map<string, vector<string>> buildAnagramMap(string dictFile);
 vector<string> findAnagrams(string word, unordered_map<string, vector<string>> &map);
+string hillClimbColumnar(string ct, int cols, int iterations = 50000);
+void solveColumnar(string ct);
+double bigramScore(string text);
+double improvedScore(string text);
+string solveColumnarSA(string ct, int cols, int iterations = 100000);
+string columnarDecryptOrder(string ct, vector<int> &order, int extraMode = 0);
+void bruteForceColumnarDebug(string ct, int cols);
+
 
 #endif

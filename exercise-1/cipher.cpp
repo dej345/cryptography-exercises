@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <numeric>
 #include <unordered_map>
+#include <cmath>
 
 
 string readCT(string fileName){
@@ -340,29 +341,328 @@ string manualSwap(string pt, char a, char b){
 }
 
 
-unordered_map<string, vector<string>> buildAnagramMap(string dictFile){
-    unordered_map<string, vector<string>> map;
-    ifstream inFile(dictFile);
-    string word;
+string hillClimbColumnar(string ct, int cols, int iterations){
+    int len = ct.length();
+    int rows = (len + cols - 1) / cols;
+    int extraCols = len % cols;
+    if (extraCols == 0) extraCols = cols;
     
-    while (inFile >> word){
-        string key = word;
-        transform(key.begin(), key.end(), key.begin(), ::tolower);
-        sort(key.begin(), key.end());
-        map[key].push_back(word);
+    // Start with random column order
+    vector<int> order(cols);
+    iota(order.begin(), order.end(), 0);
+    
+    // Seed randomness
+    srand(time(0));
+    
+    // Shuffle initial order
+    for (int i = cols - 1; i > 0; i--){
+        int j = rand() % (i + 1);
+        swap(order[i], order[j]);
     }
     
-    return map;
+    string bestPt = columnarDecryptOrder(ct, order, 0);
+    double bestScore = bigramScore(bestPt);
+    vector<int> bestOrder = order;
+    
+    for (int iter = 0; iter < iterations; iter++){
+        // Pick two random columns and swap them
+        int a = rand() % cols;
+        int b = rand() % cols;
+        while (b == a) b = rand() % cols;
+        
+        swap(order[a], order[b]);
+        
+        string pt = columnarDecryptOrder(ct, order, 0);
+        double score = bigramScore(pt);
+        
+        if (score > bestScore){
+            bestScore = score;
+            bestPt = pt;
+            bestOrder = order;
+        } else {
+            // Undo the swap
+            swap(order[a], order[b]);
+        }
+    }
+    
+    cout << "Best score: " << bestScore << endl;
+    cout << "Column order: ";
+    for (int i : bestOrder) cout << i << " ";
+    cout << endl;
+    cout << "Plaintext: " << bestPt << endl;
+    
+    return bestPt;
 }
 
 
-vector<string> findAnagrams(string word, unordered_map<string, vector<string>> &map){
-    string key = word;
-    transform(key.begin(), key.end(), key.begin(), ::tolower);
-    sort(key.begin(), key.end());
+void solveColumnar(string ct){
+    double globalBest = 0.0;
+    string globalPt = "";
     
-    if (map.find(key) != map.end()){
-        return map[key];
+    for (int cols = 5; cols <= 5; cols++){
+        cout << "\n=== " << cols << " columns ===" << endl;
+        
+        if (cols <= 8){
+            bruteForceColumnarDebug(ct, cols);
+        } else {
+            for (int attempt = 0; attempt < 20; attempt++){
+                solveColumnarSA(ct, cols);
+            }
+        }
     }
-    return {};
+    
+    cout << "\n====== BEST OVERALL ======" << endl;
+    cout << "Score: " << globalBest << endl;
+    cout << "Plaintext: " << globalPt << endl;
+}
+
+
+double bigramScore(string text){
+    // English bigram log frequencies (higher = more English-like)
+    string bigrams[] = {
+        "TH","HE","IN","ER","AN","RE","ON","AT","EN","ND",
+        "TI","ES","OR","TE","OF","ED","IS","IT","AL","AR",
+        "ST","TO","NT","NG","SE","HA","OU","IO","LE","VE",
+        "CO","ME","DE","HI","RI","RO","IC","NE","EA","RA",
+        "CE","LI","CH","LL","BE","MA","SI","OM","UR","CA",
+        "EL","TA","LA","NS","GE","HO","PO","SS","PE","OO",
+        "YO","OS","NO","SO","US","WH","AS"
+    };
+    double scores[] = {
+        3.56, 3.07, 2.43, 2.05, 1.99, 1.85, 1.76, 1.49, 1.45, 1.35,
+        1.34, 1.34, 1.28, 1.27, 1.17, 1.17, 1.13, 1.12, 1.09, 1.07,
+        1.05, 1.05, 1.04, 0.95, 0.93, 0.93, 0.87, 0.83, 0.83, 0.83,
+        0.79, 0.79, 0.76, 0.76, 0.73, 0.73, 0.70, 0.69, 0.69, 0.62,
+        0.65, 0.62, 0.60, 0.58, 0.58, 0.57, 0.55, 0.55, 0.54, 0.53,
+        0.53, 0.53, 0.53, 0.51, 0.51, 0.51, 0.51, 0.49, 0.49, 0.46,
+        0.45, 0.43, 0.42, 0.42, 0.42, 0.42, 0.41
+    };
+    
+    int numBigrams = 67;
+    unordered_map<string, double> bigramMap;
+    for (int i = 0; i < numBigrams; i++){
+        bigramMap[bigrams[i]] = scores[i];
+    }
+    
+    double score = 0.0;
+    for (int i = 0; i < (int)text.length() - 1; i++){
+        char a = toupper(text[i]);
+        char b = toupper(text[i + 1]);
+        if (!isalpha(a) || !isalpha(b)) continue;
+        
+        string pair = "";
+        pair += a;
+        pair += b;
+        
+        if (bigramMap.count(pair)){
+            score += bigramMap[pair];
+        }
+    }
+    
+    return score;
+}
+
+
+string columnarDecryptOrder(string ct, vector<int> &order, int extraMode){
+    int cols = order.size();
+    int len = ct.length();
+    int rows = (len + cols - 1) / cols;
+    int extraCols = len % cols;
+    if (extraCols == 0) extraCols = cols;
+    
+    vector<bool> isLong(cols, false);
+    
+    if (extraMode < cols){
+        // Mode 0 to cols-1: give extra to specific grid column
+        // For extraCols=1, just that one column is long
+        // For extraCols>1, start from that position and wrap
+        for (int i = 0; i < extraCols; i++){
+            isLong[(extraMode + i) % cols] = true;
+        }
+    } else if (extraMode == cols){
+        // First columns READ are long
+        for (int i = 0; i < extraCols; i++)
+            isLong[order[i]] = true;
+    } else {
+        // Last columns READ are long
+        for (int i = cols - extraCols; i < cols; i++)
+            isLong[order[i]] = true;
+    }
+    
+    vector<int> colLen(cols);
+    for (int c = 0; c < cols; c++)
+        colLen[c] = isLong[c] ? rows : rows - 1;
+    
+    vector<string> grid(cols);
+    int pos = 0;
+    for (int i = 0; i < cols; i++){
+        int c = order[i];
+        grid[c] = ct.substr(pos, colLen[c]);
+        pos += colLen[c];
+    }
+    
+    string pt = "";
+    for (int r = 0; r < rows; r++){
+        for (int c = 0; c < cols; c++){
+            if (r < (int)grid[c].length())
+                pt += grid[c][r];
+        }
+    }
+    
+    return pt;
+}
+
+
+double improvedScore(string text){
+    // Common English words/fragments to look for
+    string commonWords[] = {
+        "THE","AND","ING","HER","HAT","HIS","THA","ERE","FOR",
+        "ENT","ION","TER","WAS","YOU","ITH","VER","ALL","WIT",
+        "THI","TIO","TION","THAT","THIS","WITH","HAVE","FROM",
+        "THEY","BEEN","SAID","EACH","WHICH","THEIR","WILL",
+        "OTHER","ABOUT","MANY","THEN","THEM","SOME","COULD",
+        "MAKE","LIKE","OVER","SUCH","AFTER","ALSO","MOST",
+        "ONCE","HOPE","CHOOSE","ANYTHING","POSSIBLE","NOT",
+        "BUT","WHAT","CAN","HAD","ARE","ONE","OUR","OUT"
+    };
+    
+    string upper = "";
+    for (char c : text){
+        upper += toupper(c);
+    }
+    
+    double score = 0.0;
+    
+    // Bigram scoring
+    score += bigramScore(text);
+    
+    // Bonus for common word fragments found
+    for (auto &word : commonWords){
+        size_t pos = 0;
+        while ((pos = upper.find(word, pos)) != string::npos){
+            score += word.length() * 2.0;
+            pos++;
+        }
+    }
+    
+    // Bonus for space followed by common starting letters
+    for (int i = 0; i < (int)text.length() - 1; i++){
+        if (text[i] == ' ' && isalpha(text[i + 1])){
+            score += 0.5;  // spaces between words is good
+        }
+    }
+    
+    // Penalize unlikely patterns
+    for (int i = 0; i < (int)text.length() - 2; i++){
+        if (text[i] == ' ' && text[i+1] == ' ' && text[i+2] == ' '){
+            score -= 5.0;  // triple spaces unlikely
+        }
+    }
+
+    
+    return score;
+}
+
+
+string solveColumnarSA(string ct, int cols, int iterations){
+    srand(time(0));
+    
+    vector<int> order(cols);
+    iota(order.begin(), order.end(), 0);
+    for (int i = cols - 1; i > 0; i--){
+        int j = rand() % (i + 1);
+        swap(order[i], order[j]);
+    }
+    
+    // Try both conventions, pick whichever starts better
+    bool useReadOrder;
+    string pt1 = columnarDecryptOrder(ct, order, 1);
+    string pt2 = columnarDecryptOrder(ct, order, 0);
+    if (improvedScore(pt1) >= improvedScore(pt2)){
+        useReadOrder = true;
+    } else {
+        useReadOrder = false;
+    }
+    
+    string bestPt = columnarDecryptOrder(ct, order, useReadOrder ? 1 : 0);
+    double bestScore = improvedScore(bestPt);
+    vector<int> bestOrder = order;
+    
+    vector<int> currentOrder = order;
+    double currentScore = bestScore;
+    
+    double tempStart = 10.0;
+    double tempEnd = 0.01;
+    
+    for (int iter = 0; iter < iterations; iter++){
+        double temp = tempStart * pow(tempEnd / tempStart, (double)iter / iterations);
+        
+        vector<int> newOrder = currentOrder;
+        int a = rand() % cols;
+        int b = rand() % cols;
+        while (b == a) b = rand() % cols;
+        swap(newOrder[a], newOrder[b]);
+        
+        // Try both conventions, pick the better one
+        string ptR = columnarDecryptOrder(ct, newOrder, 1);
+        string ptG = columnarDecryptOrder(ct, newOrder, 0);
+        double scoreR = improvedScore(ptR);
+        double scoreG = improvedScore(ptG);
+        
+        string pt = (scoreR >= scoreG) ? ptR : ptG;
+        double score = max(scoreR, scoreG);
+        
+        double delta = score - currentScore;
+        if (delta > 0 || ((double)rand() / RAND_MAX) < exp(delta / temp)){
+            currentOrder = newOrder;
+            currentScore = score;
+        }
+        
+        if (score > bestScore){
+            bestScore = score;
+            bestPt = pt;
+            bestOrder = newOrder;
+        }
+    }
+    
+    cout << "Score: " << bestScore << endl;
+    cout << "Order: ";
+    for (int i : bestOrder) cout << i << " ";
+    cout << endl;
+    cout << "Plaintext: " << bestPt << endl;
+    
+    return bestPt;
+}
+
+
+void bruteForceColumnarDebug(string ct, int cols){
+    vector<int> order(cols);
+    iota(order.begin(), order.end(), 0);
+    
+    double bestScore = 0.0;
+    string bestPt = "";
+    vector<int> bestOrder;
+    int bestMode = 0;
+    
+    int totalModes = cols + 2;  // modes 0..cols-1, cols, cols+1
+    
+    do {
+        for (int mode = 0; mode < totalModes; mode++){
+            string pt = columnarDecryptOrder(ct, order, mode);
+            double score = improvedScore(pt);
+            
+            if (score > bestScore){
+                bestScore = score;
+                bestPt = pt;
+                bestOrder = order;
+                bestMode = mode;
+            }
+        }
+    } while (next_permutation(order.begin(), order.end()));
+    
+    cout << "Best Mode: " << bestMode << " Order: ";
+    for (int i : bestOrder) cout << i << " ";
+    cout << endl;
+    cout << "Score: " << bestScore << endl;
+    cout << "Plaintext: " << bestPt << endl;
 }
