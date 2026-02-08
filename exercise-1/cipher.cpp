@@ -330,10 +330,39 @@ string monoFreqSub(string ct, vector<pair<char, int>> freq){
     return pt;
 }
 
+
 string manualSwap(string pt, char a, char b){
     for (char &c : pt){
         if (c == a) c = b;
         else if (c == b) c = a;
     }
     return pt;
+}
+
+
+unordered_map<string, vector<string>> buildAnagramMap(string dictFile){
+    unordered_map<string, vector<string>> map;
+    ifstream inFile(dictFile);
+    string word;
+    
+    while (inFile >> word){
+        string key = word;
+        transform(key.begin(), key.end(), key.begin(), ::tolower);
+        sort(key.begin(), key.end());
+        map[key].push_back(word);
+    }
+    
+    return map;
+}
+
+
+vector<string> findAnagrams(string word, unordered_map<string, vector<string>> &map){
+    string key = word;
+    transform(key.begin(), key.end(), key.begin(), ::tolower);
+    sort(key.begin(), key.end());
+    
+    if (map.find(key) != map.end()){
+        return map[key];
+    }
+    return {};
 }

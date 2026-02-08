@@ -8,13 +8,15 @@ using namespace std;
 void vigenereCipher(string cipherText);
 void cipher3(string cipherText);
 void cipher4(string cipherText);
+void cipher5(string cipherText);
 
 int main(){
     // cipher 1-2 solved same way
     //vigenereCipher("ct/ct1.txt");
     //vigenereCipher("ct/ct2.txt");
     //cipher3("ct/ct3.txt");
-    cipher4("ct/ct4.txt");
+    //vigenereCipher("ct/ct4.txt");
+    cipher5("ct/ct5.txt");
 
     return 0;
 }
@@ -80,8 +82,12 @@ void cipher3(string cipherText){
 }
 
 
-void cipher4(string cipherText){
+void cipher5(string cipherText){
     string ct = readCT(cipherText);
-    vector<pair<char, int>> freq = frequencyAnalysis(ct);
-    
+    auto map = buildAnagramMap("/usr/share/dict/words");
+    auto results = findAnagrams(ct, map);
+    cout << "possible anagrams: ";
+    for (auto &s : results){
+        cout << (string)s << endl;
+    }
 }

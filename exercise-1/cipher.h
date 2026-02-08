@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <unordered_map>
 
 using namespace std;
 
@@ -60,5 +61,9 @@ double englishScore(string text);
 // made to solve cipher 3
 string monoFreqSub(string ct, vector<pair<char, int>> freq);
 string manualSwap(string pt, char a, char b);
+
+// made to solve cipher 5
+unordered_map<string, vector<string>> buildAnagramMap(string dictFile);
+vector<string> findAnagrams(string word, unordered_map<string, vector<string>> &map);
 
 #endif
