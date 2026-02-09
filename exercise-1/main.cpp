@@ -8,7 +8,6 @@ using namespace std;
 void vigenereCipher(string cipherText);
 void cipher3(string cipherText);
 void cipher4(string cipherText);
-void cipher5(string cipherText);
 
 int main(){
     // cipher 1-2 solved same way
@@ -16,7 +15,7 @@ int main(){
     vigenereCipher("ct/ct2.txt");
     cipher3("ct/ct3.txt");
     vigenereCipher("ct/ct4.txt");
-    cipher5("ct/ct5.txt"); //solved by hand in excel, needs a special algorithm for computation.
+    // cipher 5 solved by hand in excel, needs a special algorithm for computation.
 
     return 0;
 }
@@ -79,10 +78,4 @@ void cipher3(string cipherText){
         pt = manualSwap(pt, s.first, s.second);
         cout << "Swap " << s.first << "<->" << s.second << ": " << pt << endl;
     }
-}
-
-
-void cipher5(string cipherText){
-    string ct = readCT(cipherText);
-    solveColumnar(ct);
 }
