@@ -46,7 +46,7 @@ inline double englishFreq[26] = {
 
 inline string englishOrder = "ETAOINSRHDLCUMFPGWYBVKXJQZ";
     
-// made to solve c1-2
+// polyalphabetic cipher
 string readCT(string fileName);
 vector<pair<char, int>> frequencyAnalysis(string text);
 int vigenereAnalysis(string text);
@@ -58,9 +58,10 @@ vector<string> generateKeyCombinations(vector<vector<char>> &candidates);
 string decryptWithKey(string ct, string key);
 double englishScore(string text);
 
-// made to solve cipher 3
+// monoalphabetic cipher
 string monoFreqSub(string ct, vector<pair<char, int>> freq);
 string manualSwap(string pt, char a, char b);
+string buildKeyFromMappings(string ct, vector<pair<char,char>> mappings);
 
 
 #endif

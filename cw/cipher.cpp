@@ -5,7 +5,8 @@
 #include <numeric>
 #include <unordered_map>
 #include <cmath>
-
+#include <stdio.h>
+#include <string.h>
 
 string readCT(string fileName){
     ifstream inFile;
@@ -337,5 +338,30 @@ string manualSwap(string pt, char a, char b){
         if (c == a) c = b;
         else if (c == b) c = a;
     }
+    return pt;
+}
+
+string buildKeyFromMappings(string ct, vector<pair<char,char>> mappings){
+    char sub[26];
+    memset(sub, '?', 26);
+    
+    for (auto &m : mappings){
+        sub[toupper(m.first) - 'A'] = toupper(m.second);
+    }
+    
+    cout << "Key: ";
+    for (int i = 0; i < 26; i++) cout << sub[i];
+    cout << endl;
+    
+    string pt = "";
+    for (char c : ct){
+        if (isalpha(c)){
+            char decoded = sub[toupper(c) - 'A'];
+            pt += decoded;
+        } else {
+            pt += c;
+        }
+    }
+    
     return pt;
 }
