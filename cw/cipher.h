@@ -63,5 +63,4 @@ string monoFreqSub(string ct, vector<pair<char, int>> freq);
 string manualSwap(string pt, char a, char b);
 string buildKeyFromMappings(string ct, vector<pair<char,char>> mappings);
 
-
 #endif

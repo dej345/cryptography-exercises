@@ -6,12 +6,14 @@
 using namespace std;
 
 void vigenereCipher(string cipherText);
-void monoSubCipher(string cipherText);
+void cipher1(string cipherText);
+void cipher2(string cipherText);
 
 int main(){
-    // cipher 1 probably a sub
-    vigenereCipher("ct/ct1.txt");
-    monoSubCipher("ct/ct1.txt");
+    // cipher 1 substition cipher - implemented manual swaps
+    cipher1("ct/ct1.txt");
+    cipher2("ct/ct2.txt");
+    //cipher 3 done by hand in excel
     return 0;
 }
 
@@ -56,7 +58,7 @@ void vigenereCipher(string cipherText){
 }
 
 
-void monoSubCipher(string cipherText){
+void cipher1(string cipherText){
     string ct = readCT(cipherText);
     vector<pair<char, int>> freq = frequencyAnalysis(ct);
     cout << "Ciphertext = " << ct << endl;
@@ -67,9 +69,14 @@ void monoSubCipher(string cipherText){
         {'m','o'}, {'g','u'}, {'p','l'}, {'r','d'}, {'z','a'},
         {'j','r'}, {'t','i'}, {'c','e'}, {'e','w'}, {'w','c'},
         {'x','f'}, {'n','n'}, {'v','g'}, {'f','v'}, {'q','k'},
-        {'l','p'}, {'o','m'}, {'y','b'}, {'s','j'}
+        {'l','p'}, {'o','m'}, {'y','b'}, {'s','j'}, {'a','a'},
+        {'b','y'}, {'d','d'}, {'k','k'}
     };
 
     string pt = buildKeyFromMappings(ct, swaps);
     cout << pt << endl;
+}
+
+void cipher2(string cipherText){
+    // bit manipulation?? xor maybe??
 }

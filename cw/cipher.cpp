@@ -7,6 +7,7 @@
 #include <cmath>
 #include <stdio.h>
 #include <string.h>
+#include <cstdint>
 
 string readCT(string fileName){
     ifstream inFile;
@@ -340,6 +341,7 @@ string manualSwap(string pt, char a, char b){
     }
     return pt;
 }
+
 
 string buildKeyFromMappings(string ct, vector<pair<char,char>> mappings){
     char sub[26];
