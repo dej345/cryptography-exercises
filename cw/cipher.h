@@ -63,4 +63,9 @@ string monoFreqSub(string ct, vector<pair<char, int>> freq);
 string manualSwap(string pt, char a, char b);
 string buildKeyFromMappings(string ct, vector<pair<char,char>> mappings);
 
+// cipher 2
+string xorSingleByte(string cipherText, unsigned char key);
+string xorMultiByte(string cipherText, vector<unsigned char> key);
+string printSafe(string text);
+
 #endif
