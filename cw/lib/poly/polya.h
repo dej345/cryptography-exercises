@@ -25,6 +25,7 @@ vector<vector<char>> findCandidateShifts(vector<vector<pair<char, int>>> &freq, 
 int findTotalChars(string ct);
 vector<string> generateKeyCombinations(vector<vector<char>> &candidates);
 string decryptWithKey(string ct, string key);
+double indexOfCoincidence(string text);
 double englishScore(string text);
 
 #endif

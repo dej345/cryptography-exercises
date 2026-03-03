@@ -14,6 +14,7 @@ using namespace std;
 string readCT(string fileName);
 void cipher1(string cipherText);
 void cipher2(string cipherText);
+void cipher3(string cipherText);
 void vigenereCipher(string cipherText);
 
 #endif

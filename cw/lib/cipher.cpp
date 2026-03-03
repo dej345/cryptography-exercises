@@ -30,12 +30,23 @@ void cipher1(string cipherText){
 
     // manual swapping
     vector<pair<char,char>> swaps = {
-        {'E','W'}, {'u','h'}, {'b','y'}, {'i','s'}, {'h','t'},
-        {'m','o'}, {'g','u'}, {'p','l'}, {'r','d'}, {'z','a'},
-        {'j','r'}, {'t','i'}, {'c','e'}, {'w','c'},
-        {'x','f'}, {'n','n'}, {'v','g'}, {'f','v'}, {'q','k'},
-        {'l','p'}, {'o','m'}, {'y','b'}, {'s','j'}, {'a','a'},
-        {'d','d'}, {'k','k'}
+        {'h','t'}, {'u','h'}, {'c','e'}, // huc -> the
+        {'b','y'}, {'m','o'}, {'g','u'}, // bmg -> you
+        {'x','f'}, // mx -> of
+        {'z','a'}, // huzh -> that
+        {'t','i'}, {'i','s'}, // ti -> is
+        {'n','n'}, {'r','d'}, // znr -> and
+        {'E','W'}, // Eub -> Why
+        {'w','c'}, {'p','l'}, // wpmgr -> cloud
+        {'j','r'}, // jcimpghtmni -> resolutions
+        {'q','k'}, // qccl -> keep
+        {'v','g'}, // uznvtnv -> hanging
+        {'f','v'}, // mfcj -> over
+        {'l','p'}, // pmwzp -> local
+        {'o','m'}, // ozb -> may
+        {'y','b'}, // ygh -> but
+        {'s','j'} // smv -> jog
+        
     };
 
     string pt = buildKeyFromMappings(ct, swaps);
@@ -52,6 +63,13 @@ void cipher2(string cipherText){
 }
 
 
+void cipher3(string cipherText){
+    string ct = readCT(cipherText);
+    cout << "Ciphertext = " << ct << endl;
+    vector<pair<char, int>> freq = frequencyAnalysis(ct);
+}
+
+
 void vigenereCipher(string cipherText){
     string ct = readCT(cipherText);
     int keyLength = vigenereAnalysis(ct);
@@ -59,14 +77,14 @@ void vigenereCipher(string cipherText){
     
     vector<vector<pair<char, int>>> freq;
     for (string st : subtext){
-        freq.push_back(frequencyAnalysis(st));
+        freq.push_back(frequencyAnalysis(st)); // freq analysis per subtexts
     }
 
     int totalChars = findTotalChars(ct);
-    vector<vector<char>> candidateShifts = findCandidateShifts(freq, subtext);
+    vector<vector<char>> candidateShifts = findCandidateShifts(freq, subtext); // find candidates with freq > 10%
     
+    // score for all key combinations
     vector<string> keys = generateKeyCombinations(candidateShifts);
-    
     vector<pair<string, double>> keyScores;
     for (string &key : keys){
         string pt = decryptWithKey(ct, key);

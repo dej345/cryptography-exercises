@@ -233,27 +233,31 @@ string decryptWithKey(string ct, string key){
 }
 
 
-double englishScore(string text){    
+double indexOfCoincidence(string text){
     int counts[26] = {0};
-    int totalLetters = 0;
+    int N = 0;
     
     for (char c : text){
         if (isalpha(c)){
             counts[toupper(c) - 'A']++;
-            totalLetters++;
+            N++;
         }
     }
     
-    if (totalLetters == 0) return 0.0;
+    if (N <= 1) return 0.0;
     
-    double chiSquared = 0.0;
+    double sum = 0.0;
     for (int i = 0; i < 26; i++){
-        double expected = (englishFreq[i] / 100.0) * totalLetters;
-        double observed = counts[i];
-        if (expected > 0){
-            chiSquared += ((observed - expected) * (observed - expected)) / expected;
-        }
+        sum += counts[i] * (counts[i] - 1);
     }
     
-    return chiSquared;
+    return sum / ((double)N * (N - 1));
+}
+
+
+double englishScore(string text){
+    // Uses IC distance from English (0.065) — lower is better
+    double ic = indexOfCoincidence(text);
+    double distance = fabs(ic - 0.065);
+    return distance;
 }
